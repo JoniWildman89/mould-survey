@@ -11,11 +11,12 @@
       padding: 20px;
     }
     img {
-      max-width: 100%;
+      max-width: 400px;
       height: auto;
       margin: 20px 0;
+      border: 1px solid #ccc;
     }
-    .question {
+    .question, .welcome, .results {
       display: none;
     }
     .visible {
@@ -26,11 +27,31 @@
       font-size: 16px;
       margin: 5px;
     }
+    input {
+      padding: 8px;
+      font-size: 16px;
+      margin: 5px;
+    }
   </style>
 </head>
 <body>
   <h1>Mould Detection Survey</h1>
+
+  <div id="welcome" class="welcome visible">
+    <p>Welcome! Please enter your information to begin the survey.</p>
+    <input type="email" id="email" placeholder="Your email" required><br>
+    <input type="text" id="participantId" placeholder="Participant ID" required><br>
+    <button onclick="startSurvey()">Start Survey</button>
+  </div>
+
   <div id="survey"></div>
+
+  <div id="results" class="results">
+    <h2>Survey Complete</h2>
+    <ul id="resultsList"></ul>
+    <p>Thank you for participating!</p>
+  </div>
+
   <script>
     const NUM_QUESTIONS = 10;
     const IMAGES_PER_QUESTION = 15;
@@ -38,17 +59,39 @@
     let currentQuestion = 0;
     let currentImage = 0;
     let responses = [];
+    let participantEmail = '';
+    let participantId = '';
 
     const surveyContainer = document.getElementById('survey');
+    const welcomeScreen = document.getElementById('welcome');
+    const resultsScreen = document.getElementById('results');
+    const resultsList = document.getElementById('resultsList');
 
-    const imageBasePath = 'images'; // Folder where images are stored
+    const imageBasePath = 'images';
 
     function getImagePath(q, i) {
       return `${imageBasePath}/q${q + 1}_img${i + 1}.jpg`;
     }
 
+    function startSurvey() {
+      const emailInput = document.getElementById('email').value;
+      const idInput = document.getElementById('participantId').value;
+
+      if (!emailInput || !idInput) {
+        alert("Please enter both email and participant ID.");
+        return;
+      }
+
+      participantEmail = emailInput;
+      participantId = idInput;
+
+      welcomeScreen.classList.remove('visible');
+      renderImage();
+    }
+
     function renderImage() {
       surveyContainer.innerHTML = '';
+      surveyContainer.classList.add('visible');
 
       const questionDiv = document.createElement('div');
       questionDiv.classList.add('question', 'visible');
@@ -94,18 +137,36 @@
     }
 
     function showResults() {
-      surveyContainer.innerHTML = '<h2>Survey Complete</h2>';
-      const resultsList = document.createElement('ul');
+      surveyContainer.classList.remove('visible');
+      resultsScreen.classList.add('visible');
+
       responses.forEach(r => {
         const li = document.createElement('li');
         li.textContent = `Question ${r.question}: Image ${r.selectedImage}`;
         resultsList.appendChild(li);
       });
-      surveyContainer.appendChild(resultsList);
+
+      sendResults();
     }
 
-    // Start survey
-    renderImage();
+    function sendResults() {
+      const resultObj = {
+        email: participantEmail,
+        participantId: participantId
+      };
+
+      responses.forEach(r => {
+        resultObj[`q${r.question}`] = r.selectedImage;
+      });
+
+      fetch('https://script.google.com/macros/s/AKfycbwe4JpvqziX2JHVtV1keijHqYsIVCOkimCoQ0UyybDXabEYaMyCwM-vGE7_rFhE8aMccw/exec', {
+        method: 'POST',
+        body: JSON.stringify(resultObj),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => console.log('Submitted to Google Sheets'))
+      .catch(error => console.error('Error:', error));
+    }
   </script>
 </body>
 </html>
