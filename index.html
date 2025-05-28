@@ -47,9 +47,8 @@
   <div id="survey"></div>
 
   <div id="results" class="results">
-    <h2>Survey Complete</h2>
-    <ul id="resultsList"></ul>
-    <p>Thank you for participating!</p>
+    <h2>Thank you for completing the survey!</h2>
+    <p>Your responses have been submitted.</p>
   </div>
 
   <script>
@@ -65,7 +64,6 @@
     const surveyContainer = document.getElementById('survey');
     const welcomeScreen = document.getElementById('welcome');
     const resultsScreen = document.getElementById('results');
-    const resultsList = document.getElementById('resultsList');
 
     const imageBasePath = 'images';
 
@@ -129,6 +127,7 @@
     function nextQuestion() {
       currentQuestion++;
       currentImage = 0;
+
       if (currentQuestion < NUM_QUESTIONS) {
         renderImage();
       } else {
@@ -139,12 +138,6 @@
     function showResults() {
       surveyContainer.classList.remove('visible');
       resultsScreen.classList.add('visible');
-
-      responses.forEach(r => {
-        const li = document.createElement('li');
-        li.textContent = `Question ${r.question}: Image ${r.selectedImage}`;
-        resultsList.appendChild(li);
-      });
 
       sendResults();
     }
