@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mould Detection Survey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 20px 0;
+    }
+    .question {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mould Detection Survey</h1>
+  <div id="survey"></div>
+  <script>
+    const NUM_QUESTIONS = 10;
+    const IMAGES_PER_QUESTION = 15;
+
+    let currentQuestion = 0;
+    let currentImage = 0;
+    let responses = [];
+
+    const surveyContainer = document.getElementById('survey');
+
+    const imageBasePath = 'images'; // Folder where images are stored
+
+    function getImagePath(q, i) {
+      return `${imageBasePath}/q${q + 1}_img${i + 1}.jpg`;
+    }
+
+    function renderImage() {
+      surveyContainer.innerHTML = '';
+
+      const questionDiv = document.createElement('div');
+      questionDiv.classList.add('question', 'visible');
+
+      const img = document.createElement('img');
+      img.src = getImagePath(currentQuestion, currentImage);
+
+      const info = document.createElement('p');
+      info.textContent = `Question ${currentQuestion + 1} - Image ${currentImage + 1} of ${IMAGES_PER_QUESTION}`;
+
+      const nextBtn = document.createElement('button');
+      nextBtn.textContent = 'Next Image';
+      nextBtn.onclick = () => {
+        if (currentImage < IMAGES_PER_QUESTION - 1) {
+          currentImage++;
+          renderImage();
+        }
+      };
+
+      const selectBtn = document.createElement('button');
+      selectBtn.textContent = 'Select This Image (First Mould Seen)';
+      selectBtn.onclick = () => {
+        responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
+        nextQuestion();
+      };
+
+      questionDiv.appendChild(info);
+      questionDiv.appendChild(img);
+      questionDiv.appendChild(nextBtn);
+      questionDiv.appendChild(selectBtn);
+
+      surveyContainer.appendChild(questionDiv);
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      currentImage = 0;
+      if (currentQuestion < NUM_QUESTIONS) {
+        renderImage();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      surveyContainer.innerHTML = '<h2>Survey Complete</h2>';
+      const resultsList = document.createElement('ul');
+      responses.forEach(r => {
+        const li = document.createElement('li');
+        li.textContent = `Question ${r.question}: Image ${r.selectedImage}`;
+        resultsList.appendChild(li);
+      });
+      surveyContainer.appendChild(resultsList);
+    }
+
+    // Start survey
+    renderImage();
+  </script>
+</body>
+</html>
