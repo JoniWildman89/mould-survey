@@ -137,30 +137,43 @@
 
     function showResults() {
       surveyContainer.classList.remove('visible');
+      surveyContainer.innerHTML = '';
       resultsScreen.classList.add('visible');
-
       sendResults();
     }
 
     function sendResults() {
-      const resultObj = {
-        email: participantEmail,
-        participantId: participantId
-      };
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://script.google.com/macros/s/AKfycbwe4JpvqziX2JHVtV1keijHqYsIVCOkimCoQ0UyybDXabEYaMyCwM-vGE7_rFhE8aMccw/exec';
+      form.target = 'hidden_iframe';
+
+      const emailInput = document.createElement('input');
+      emailInput.name = 'email';
+      emailInput.value = participantEmail;
+      form.appendChild(emailInput);
+
+      const idInput = document.createElement('input');
+      idInput.name = 'participantId';
+      idInput.value = participantId;
+      form.appendChild(idInput);
 
       responses.forEach(r => {
-        resultObj[`q${r.question}`] = r.selectedImage;
+        const input = document.createElement('input');
+        input.name = `q${r.question}`;
+        input.value = r.selectedImage;
+        form.appendChild(input);
       });
 
-      fetch('https://script.google.com/macros/s/AKfycbwe4JpvqziX2JHVtV1keijHqYsIVCOkimCoQ0UyybDXabEYaMyCwM-vGE7_rFhE8aMccw/exec', {
-        method: 'POST',
-        body: JSON.stringify(resultObj),
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then(response => console.log('Submitted to Google Sheets'))
-      .catch(error => console.error('Error:', error));
+      document.body.appendChild(form);
+
+      const iframe = document.createElement('iframe');
+      iframe.name = 'hidden_iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      form.submit();
     }
   </script>
 </body>
 </html>
-
