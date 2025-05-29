@@ -121,12 +121,15 @@
       welcomeScreen.classList.add('hidden');
       welcomeScreen.classList.remove('visible');
 
+      // Show survey container
+      surveyContainer.classList.remove('hidden');
+      surveyContainer.classList.add('visible');
+
       renderImage();
     }
 
     function renderImage() {
       surveyContainer.innerHTML = '';
-      surveyContainer.classList.remove('hidden');
 
       const questionDiv = document.createElement('div');
       const progressBar = document.createElement('progress');
@@ -213,4 +216,3 @@
   </script>
 </body>
 </html>
-
