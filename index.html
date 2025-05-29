@@ -1,54 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mould Detection Survey</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
-    img {
-      max-width: 400px;
-      height: auto;
-      margin: 20px 0;
+    h1 {
+      margin-top: 40px;
+    }
+    .container {
+      max-width: 600px;
+      width: 90%;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 5px;
       border: 1px solid #ccc;
     }
-    .question, .welcome, .results {
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    img {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .hidden {
       display: none;
     }
     .visible {
       display: block;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 5px;
+    #progressBar {
+      width: 100%;
+      height: 20px;
+      margin-top: 10px;
+      margin-bottom: 20px;
     }
-    input {
-      padding: 8px;
-      font-size: 16px;
-      margin: 5px;
+    .center {
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <h1>Mould Detection Survey</h1>
 
-  <div id="welcome" class="welcome visible">
-    <p>Welcome! Please enter your information to begin the survey.</p>
-    <input type="email" id="email" placeholder="Your email" required><br>
-    <input type="text" id="participantId" placeholder="Participant ID" required><br>
-    <button onclick="startSurvey()">Start Survey</button>
-  </div>
+  <div class="container">
+    <div id="welcome" class="visible">
+      <p>Please enter your name or email to begin the survey.</p>
+      <input type="text" id="userId" placeholder="Your Name or Email" required />
+      <button onclick="startSurvey()">Start Survey</button>
+    </div>
 
-  <div id="survey"></div>
+    <div id="survey" class="hidden"></div>
 
-  <div id="results" class="results">
-    <h2>Thank you for completing the survey!</h2>
-    <p>Your responses have been submitted.</p>
+    <div id="results" class="hidden center">
+      <h2>Thank you for completing the survey!</h2>
+      <p>Your responses have been submitted.</p>
+    </div>
   </div>
 
   <script>
@@ -58,7 +95,6 @@
     let currentQuestion = 0;
     let currentImage = 0;
     let responses = [];
-    let participantEmail = '';
     let participantId = '';
 
     const surveyContainer = document.getElementById('survey');
@@ -72,33 +108,38 @@
     }
 
     function startSurvey() {
-      const emailInput = document.getElementById('email').value;
-      const idInput = document.getElementById('participantId').value;
+      const userInput = document.getElementById('userId').value.trim();
 
-      if (!emailInput || !idInput) {
-        alert("Please enter both email and participant ID.");
+      if (!userInput) {
+        alert("Please enter your name or email.");
         return;
       }
 
-      participantEmail = emailInput;
-      participantId = idInput;
+      participantId = userInput;
 
-      welcomeScreen.classList.remove('visible');
+      welcomeScreen.classList.add('hidden');
       renderImage();
     }
 
     function renderImage() {
       surveyContainer.innerHTML = '';
-      surveyContainer.classList.add('visible');
+      surveyContainer.classList.remove('hidden');
 
       const questionDiv = document.createElement('div');
-      questionDiv.classList.add('question', 'visible');
-
-      const img = document.createElement('img');
-      img.src = getImagePath(currentQuestion, currentImage);
+      const progressBar = document.createElement('progress');
+      progressBar.id = 'progressBar';
+      progressBar.max = NUM_QUESTIONS;
+      progressBar.value = currentQuestion;
+      questionDiv.appendChild(progressBar);
 
       const info = document.createElement('p');
       info.textContent = `Question ${currentQuestion + 1} - Image ${currentImage + 1} of ${IMAGES_PER_QUESTION}`;
+      questionDiv.appendChild(info);
+
+      const img = document.createElement('img');
+      img.src = getImagePath(currentQuestion, currentImage);
+      img.alt = `Question ${currentQuestion + 1}, Image ${currentImage + 1}`;
+      questionDiv.appendChild(img);
 
       const nextBtn = document.createElement('button');
       nextBtn.textContent = 'Next Image';
@@ -108,6 +149,7 @@
           renderImage();
         }
       };
+      questionDiv.appendChild(nextBtn);
 
       const selectBtn = document.createElement('button');
       selectBtn.textContent = 'Select This Image (First Mould Seen)';
@@ -115,10 +157,6 @@
         responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
         nextQuestion();
       };
-
-      questionDiv.appendChild(info);
-      questionDiv.appendChild(img);
-      questionDiv.appendChild(nextBtn);
       questionDiv.appendChild(selectBtn);
 
       surveyContainer.appendChild(questionDiv);
@@ -136,9 +174,8 @@
     }
 
     function showResults() {
-      surveyContainer.classList.remove('visible');
-      surveyContainer.innerHTML = '';
-      resultsScreen.classList.add('visible');
+      surveyContainer.classList.add('hidden');
+      resultsScreen.classList.remove('hidden');
       sendResults();
     }
 
@@ -148,32 +185,32 @@
       form.action = 'https://script.google.com/macros/s/AKfycbzan2csyMT7p3aJA6v2tBDhj0AXuiVVKpwGnT7iYPPRmhbIkh-bFaTnFhvXI3aPksdY8A/exec';
       form.target = 'hidden_iframe';
 
-      const emailInput = document.createElement('input');
-      emailInput.name = 'email';
-      emailInput.value = participantEmail;
-      form.appendChild(emailInput);
-
       const idInput = document.createElement('input');
-      idInput.name = 'participantId';
+      idInput.type = 'hidden';
+      idInput.name = 'userId';
       idInput.value = participantId;
       form.appendChild(idInput);
 
       responses.forEach(r => {
         const input = document.createElement('input');
+        input.type = 'hidden';
         input.name = `q${r.question}`;
         input.value = r.selectedImage;
         form.appendChild(input);
       });
 
-      document.body.appendChild(form);
-
       const iframe = document.createElement('iframe');
       iframe.name = 'hidden_iframe';
       iframe.style.display = 'none';
       document.body.appendChild(iframe);
+      document.body.appendChild(form);
 
       form.submit();
     }
+  </script>
+</body>
+</html>
+
   </script>
 </body>
 </html>
