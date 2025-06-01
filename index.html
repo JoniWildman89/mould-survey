@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mould Detection Survey!</title>
+  <title>Mould Detection Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f7fa;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f9fafc;
       color: #333;
       margin: 0;
       padding: 0;
@@ -18,55 +22,72 @@
     }
     h1 {
       margin-top: 40px;
+      font-weight: 500;
+      color: #202124;
     }
     .container {
-      max-width: 600px;
+      max-width: 640px;
       width: 90%;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      background-color: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
       margin: 20px;
     }
     input, button {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 12px 16px;
+      margin: 12px 0;
       font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      border-radius: 6px;
+      border: 1px solid #dcdfe3;
+      font-family: inherit;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4285f4;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
     }
     button {
-      background-color: #007bff;
+      background-color: #4285f4;
       color: white;
       border: none;
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
     button:hover {
-      background-color: #0056b3;
+      background-color: #3367d6;
     }
     img {
       width: 100%;
       height: auto;
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       margin: 20px 0;
-      border-radius: 5px;
+      border-radius: 6px;
     }
     .hidden {
-      display: none;
-    }
-    .visible {
-      display: block;
-    }
-    #progressBar {
-      width: 100%;
-      height: 20px;
-      margin-top: 10px;
-      margin-bottom: 20px;
+      display: none !important;
     }
     .center {
       text-align: center;
+    }
+    #progressBar {
+      width: 100%;
+      height: 16px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      margin-top: 20px;
+    }
+    @media (min-width: 480px) {
+      .button-row {
+        flex-direction: row;
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -74,7 +95,7 @@
   <h1>Mould Detection Survey</h1>
 
   <div class="container">
-    <div id="welcome" class="visible">
+    <div id="welcome">
       <p>Please enter your name or email to begin the survey.</p>
       <input type="text" id="userId" placeholder="Your Name or Email" required />
       <button onclick="startSurvey()">Start Survey</button>
@@ -109,15 +130,13 @@
 
     function startSurvey() {
       const userInput = document.getElementById('userId').value.trim();
-
       if (!userInput) {
         alert("Please enter your name or email.");
         return;
       }
 
       participantId = userInput;
-
-      welcomeScreen.classList.add('hidden');
+      welcomeScreen.remove();  // Completely remove the welcome section
       renderImage();
     }
 
@@ -126,6 +145,7 @@
       surveyContainer.classList.remove('hidden');
 
       const questionDiv = document.createElement('div');
+
       const progressBar = document.createElement('progress');
       progressBar.id = 'progressBar';
       progressBar.max = NUM_QUESTIONS;
@@ -133,13 +153,20 @@
       questionDiv.appendChild(progressBar);
 
       const info = document.createElement('p');
-      info.textContent = `Question ${currentQuestion + 1} - Image ${currentImage + 1} of ${IMAGES_PER_QUESTION}`;
+      info.textContent = `Question ${currentQuestion + 1} – Image ${currentImage + 1} of ${IMAGES_PER_QUESTION}`;
       questionDiv.appendChild(info);
 
       const img = document.createElement('img');
       img.src = getImagePath(currentQuestion, currentImage);
       img.alt = `Question ${currentQuestion + 1}, Image ${currentImage + 1}`;
+      img.onerror = () => {
+        img.alt = "Image could not be loaded.";
+        img.style.opacity = 0.6;
+      };
       questionDiv.appendChild(img);
+
+      const buttonRow = document.createElement('div');
+      buttonRow.className = 'button-row';
 
       const nextBtn = document.createElement('button');
       nextBtn.textContent = 'Next Image';
@@ -149,16 +176,27 @@
           renderImage();
         }
       };
-      questionDiv.appendChild(nextBtn);
+      buttonRow.appendChild(nextBtn);
 
       const selectBtn = document.createElement('button');
       selectBtn.textContent = 'Select This Image (First Mould Seen)';
       selectBtn.onclick = () => {
-        responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
+        if (confirm("Are you sure you want to select this image as the first sign of mould?")) {
+          responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
+          nextQuestion();
+        }
+      };
+      buttonRow.appendChild(selectBtn);
+
+      const skipBtn = document.createElement('button');
+      skipBtn.textContent = 'Skip Question';
+      skipBtn.onclick = () => {
+        responses.push({ question: currentQuestion + 1, selectedImage: null });
         nextQuestion();
       };
-      questionDiv.appendChild(selectBtn);
+      buttonRow.appendChild(skipBtn);
 
+      questionDiv.appendChild(buttonRow);
       surveyContainer.appendChild(questionDiv);
     }
 
@@ -191,6 +229,12 @@
       idInput.value = participantId;
       form.appendChild(idInput);
 
+      const timestampInput = document.createElement('input');
+      timestampInput.type = 'hidden';
+      timestampInput.name = 'timestamp';
+      timestampInput.value = new Date().toISOString();
+      form.appendChild(timestampInput);
+
       responses.forEach(r => {
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -210,3 +254,4 @@
   </script>
 </body>
 </html>
+
