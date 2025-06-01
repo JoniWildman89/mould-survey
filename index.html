@@ -79,18 +79,22 @@
     .image-row {
       display: flex;
       flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: space-between;
       gap: 20px;
       flex-wrap: wrap;
+      margin-top: 20px;
     }
     .image-row img {
       flex: 1 1 60%;
+      max-height: 60vh;
+      object-fit: contain;
     }
     .button-column {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      flex: 1 1 35%;
+      flex: 1 1 30%;
       min-width: 150px;
     }
   </style>
@@ -199,10 +203,8 @@
       const selectBtn = document.createElement('button');
       selectBtn.textContent = 'Select This Image (First Mould Seen)';
       selectBtn.onclick = () => {
-        if (confirm("Are you sure you want to select this image as the first sign of mould?")) {
-          responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
-          nextQuestion();
-        }
+        responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
+        nextQuestion();
       };
       buttons.appendChild(selectBtn);
 
@@ -266,5 +268,3 @@
   </script>
 </body>
 </html>
-
-
