@@ -115,7 +115,7 @@
       </p>
       <img src="example.jpg" alt="(left) Non-mouldy specimens and (right) mouldy specimens">
       <p>
-        For each question in the survey, select the image where you <strong>first notice visible signs of mould growth</strong>. If you do not observe any mould in the sequence, you may skip to the next image. The survey consists of <strong>10 questions</strong>, each showing <strong>15 images</strong>. If you have any questions, or you would like to learn more about this work, please email Joni Wildman at jlw89@bath.ac.uk.
+        For each question in the survey, select the image where you <strong>first notice visible signs of mould growth</strong>. If you do not observe any mould in the sequence, you may skip to the next image. You cannot go backwards once you have skipped to the next image. The survey consists of <strong>10 questions</strong>, each showing <strong>15 images</strong>. If you have any questions, or you would like to learn more about this work, please email Joni Wildman at jlw89@bath.ac.uk.
       </p>
       <input type="text" id="userId" placeholder="Enter your name (or make one up!)" required />
       <button onclick="startSurvey()">Start Survey</button>
@@ -151,7 +151,7 @@
     function startSurvey() {
       const userInput = document.getElementById('userId').value.trim();
       if (!userInput) {
-        alert("Please enter your name or email.");
+        alert("Please enter a name");
         return;
       }
 
@@ -191,7 +191,7 @@
       buttons.className = 'button-column';
 
       const nextBtn = document.createElement('button');
-      nextBtn.textContent = 'Next Image';
+      nextBtn.textContent = 'No mould seen';
       nextBtn.onclick = () => {
         if (currentImage < IMAGES_PER_QUESTION - 1) {
           currentImage++;
@@ -201,7 +201,7 @@
       buttons.appendChild(nextBtn);
 
       const selectBtn = document.createElement('button');
-      selectBtn.textContent = 'Select This Image (First Mould Seen)';
+      selectBtn.textContent = 'Mould seen';
       selectBtn.onclick = () => {
         responses.push({ question: currentQuestion + 1, selectedImage: currentImage + 1 });
         nextQuestion();
